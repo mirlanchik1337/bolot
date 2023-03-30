@@ -15,14 +15,15 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path
-from posts.views import main_page_view, products_view, post_detail_view
+from posts.views import main_page_view, products_view, post_detail_view, post_create_view
 from django.conf.urls.static import static
 from block import settings
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('', main_page_view),
     path('products/', products_view),
-    path('products/<int:id>/', post_detail_view)
+    path('products/<int:id>/', post_detail_view),
+    path('products/create/', post_create_view)
 ]
 #python main.py
 

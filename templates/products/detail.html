@@ -23,7 +23,13 @@
                 <p>{{ post.modified_date }}</p>
             </div>
         </div>
-
+        <div class="create_review">
+            <form action="/products/{{ post.id }}/" method="post">
+                {% csrf_token %}
+                {{ form }}
+                <input type="submit" value="Add review">
+            </form>
+        </div>
         <div class="reviews">
             {% for review in reviews %}
                 <div class="review_block">
