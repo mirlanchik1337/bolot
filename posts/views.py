@@ -10,7 +10,8 @@ def products_view(request):
         posts = Post.objects.all()
 
         context = {
-            'posts': posts
+            'posts': posts,
+            'user': request.user
         }
         return render(request, 'products/products.html',context=context)
 
