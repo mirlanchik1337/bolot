@@ -14,7 +14,15 @@
             width: 100%;
         }
     </style>
-    <div class="Post">
+    <form action="/products/" method="get">
+        <label>
+            <input type="text" name="search">
+        </label>
+        <label>
+            <input type="submit" value="Search">
+        </label>
+    </form>
+        <div class="Post">
         {% for post in posts %}
             <div class="card" style="width: 18rem;">
                 <div class="card-body">
@@ -27,5 +35,12 @@
                 </div>
             </div>
         {% endfor %}
+    </div>
+    <div class="pages">
+        {% for page in pages %}
+            <a href="/products/?page={{ page }}">
+                <button>{{ page }}</button>
+            </a>
+    {% endfor %}
     </div>
 {% endblock %}
