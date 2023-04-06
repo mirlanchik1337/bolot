@@ -14,12 +14,9 @@ def products_view(request):
         if search:
             posts = posts.filter(title__icontains=search) | posts.filter(description__icontains=search)
         max_page = posts.__len__() / PAGINATION_LIMIT
-        posts = posts[PAGINATION_LIMIT * (page-1):PAGINATION_LIMIT * page]
-        if round(max_page) < max_page:
-            max_page = round(max_page) + 1
-        else:
-            max_page = round(max_page)
+        max_page = round(max_page) + 1 if round(max_page) < max_page else round(max_page)
         print(max_page)
+        posts = posts[PAGINATION_LIMIT * (page-1):PAGINATION_LIMIT * page]
         context = {
             'posts': posts,
             'user': request.user,
