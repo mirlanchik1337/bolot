@@ -1,39 +1,45 @@
 {% extends 'layouts/index.html' %}
 {% load static %}
-
 {% block head %}
-    <link rel = "stylesheet" href="{% static 'detail.css' %}">
+    <link rel="stylesheet" href="{% static 'detail.css' %}">
 {% endblock %}
 
 {% block content %}
-    <div class="post_block">
-        <div class="image">
-            {% if post.image %}
-                <img src="/media/{{ post.image }}" alt="">
-            {% else %}
-                <img src="{% static 'img.png' %}" alt="">
-            {% endif %}
-        </div>
+    <div class="product_block" style="padding: 70px">
         <div class="info">
-            <h1>{{ post.title }}</h1>
-            <h4>{{ post.description }}</h4>
-            <h4>Rate: {{ post.rate }}</h4>
-            <div class="dates">
-                <p>{{ post.created_date }}</p>
-                <p>{{ post.modified_date }}</p>
+            <img style="max-width: 600px ; padding:5cap" class="product_image" src="/media/{{ product.image }}" alt="">
+            <div style="background-color:#242b2e; color: white; height: 23px; width: 38px ; margin-top: auto"
+                 class="price">
+                <p>{{ product.price }}</p>
             </div>
+            <h1>{{ product.title }}</h1>
+            <div class="lol" style="background-color: #242b2e;color: white;margin-bottom: 20px;border-radius: 5px;">
+                <h4>{{ product.description }}</h4>
+            </div>
+
+            <h4>Rate: {{ product.rate }}</h4>
+            <div class="dates">
+                <p>{{ product.created_date }}</p>
+                <p>{{ product.modified_date }}</p>
+                <p class="comments_title">Сomments</p>
+
+
+            </div>
+        {% if  not user.is_anonymous %}
+            <div class="create_comment">
+                <form action="/products/{{ product.id }}/" method="post">
+                        {% csrf_token %}
+                        {{ form.as_p }}
+                        <input style="height: 40px; width: 150px;" type="submit" value="Add comment">
+                    </form>
+                </div>
+            {% endif %}
+
         </div>
-        <div class="create_review">
-            <form action="/products/{{ post.id }}/" method="post">
-                {% csrf_token %}
-                {{ form }}
-                <input type="submit" value="Add review">
-            </form>
-        </div>
-        <div class="reviews">
-            {% for review in reviews %}
-                <div class="review_block">
-                    <h5>{{ review.text }}</h5>
+        <div class="comments">
+            {% for comment in Comments %}
+                <div class="comment_block">
+                    <h5>{{ comment.text }}</h5>
                 </div>
             {% endfor %}
         </div>

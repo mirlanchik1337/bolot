@@ -1,37 +1,44 @@
 {% extends 'layouts/index.html' %}
-
+{% load static %}
 {% block content %}
     <style type="text/css">
-        .Post {
+        .products {
             display: flex;
             justify-content: space-between;
             width: 80%;
             margin-left: 10%;
             margin-top: 20px;
             flex-wrap: wrap;
+            gap: 20px;
+            display: flex;
+            text-align: center;
         }
-        .image > img {
+
+        .product_image > img {
             width: 100%;
         }
     </style>
-    <form action="/products/" method="get">
-        <label>
-            <input type="text" name="search">
-        </label>
-        <label>
-            <input type="submit" value="Search">
-        </label>
+    <form action="/products" method="get">
+        <input type="text" name="search">
+        <input type="submit" value="Search">
     </form>
-        <div class="Post">
-        {% for post in posts %}
-            <div class="card" style="width: 18rem;">
+    <div class="products">
+        {% for product in products %}
+            <div class="card" style="width: 18rem ;">
                 <div class="card-body">
                     <div class="image">
-                        <img src="/media/{{ post.image }}/" alt="">
+                        {% if product.image %}
+                            <img style="; display: flex ;max-width: 200px; padding-top:50px ; padding-bottom :25px ; padding-right : 25px ; padding-left :25px  "
+                                 class="product_image" src="/media/{{ product.image }}" alt="">
+                        {% else %}
+                            <img style="max-width: 250px; max-height: 210px; border-image:5%" src="{% static 'img.png' %} " alt="">
+                        {% endif %}
                     </div>
-                    <h5 class="card-title">{{ post.title }}</h5>
-                    <h6 class="card-subtitle mb-2 text-muted">Rate: {{ post.rate }}</h6>
-                    <a href="/products/{{ post.id }}/" class="card-link">More</a>
+                    <h5 class="card-title">{{ product.title }}</h5>
+                    <div class="rate">
+                        <h6 class="rate">{{ product.rate }}</h6>
+                    </div>
+                    <a href="/products/{{ product.id }}" class="card-link">Подробнее</a>
                 </div>
             </div>
         {% endfor %}
@@ -41,6 +48,6 @@
             <a href="/products/?page={{ page }}">
                 <button>{{ page }}</button>
             </a>
-    {% endfor %}
+        {% endfor %}
     </div>
 {% endblock %}

@@ -1,80 +1,98 @@
+from django.views.generic import ListView, CreateView, DetailView
 from django.shortcuts import render, redirect
 from posts.models import Post, Review
 from posts.forms import PostCreateForm, ReviewCreateForm
 from posts.constants import PAGINATION_LIMIT
-def main_page_view(request):
-    if request.method == 'GET':
-        return render(request, 'layouts/index.html')
-def products_view(request):
-    if request.method == 'GET':
-        posts = Post.objects.all().order_by('-created_date')
+
+
+class MainPageCBV(ListView):
+    model = Post
+    template_name =     'layouts/index.html'
+
+
+class ProductCBV(ListView, CreateView):
+    model = Post
+    template_name = 'products/products.html'
+    context_object_name = 'products'
+
+
+    def get(self, request, **kwargs):
+        products = self.get_queryset()
         search = request.GET.get('search')
         page = int(request.GET.get('page', 1))
-
+        '''search'''
         if search:
-            posts = posts.filter(title__icontains=search) | posts.filter(description__icontains=search)
-        max_page = posts.__len__() / PAGINATION_LIMIT
+            products = products.filter(title__icontains=search) | products.filter(description__icontains=search)
+        '''pagination'''
+        max_page = products.__len__() / PAGINATION_LIMIT
         max_page = round(max_page) + 1 if round(max_page) < max_page else round(max_page)
-        print(max_page)
-        posts = posts[PAGINATION_LIMIT * (page-1):PAGINATION_LIMIT * page]
+
+        '''product splice '''
+        products = products[PAGINATION_LIMIT * (page - 1):PAGINATION_LIMIT * page]
+        '''context'''
         context = {
-            'posts': posts,
-            'user': request.user,
+            'products': products,
+            "user": request.user,
             'pages': range(1, max_page + 1)
-
         }
-        return render(request, 'products/products.html',context=context)
+        return render(request, 'products/products.html', context=context)
 
 
-def post_detail_view(request,id):
+class ProductDetailCBV(DetailView, CreateView):
+    model = Post
+    template_name = 'products/detail.html'
+    form_class = ReviewCreateForm
+    pk_url_kwarg = 'id'
 
-    if request.method == 'GET':
-        post = Post.objects.get(id=id)
-        #reviews = Review.objects.filter(post_id=id)
-        context = {
-
-            'post': post,
-            'reviews': post.review_set.all(),
-            'form': ReviewCreateForm
+    def get_context_data(self, *, object_list=None, **kwargs):
+        return {
+            'product': self.get_object(),
+            'Comments': Review.objects.filter(product=self.get_object()),
+            'form': kwargs.get('form', self.form_class)
         }
-        return render(request, 'products/detail.html', context=context)
 
+    def post(self, request, **kwargs):
 
-    if request.method == 'POST':
-        post = Post.objects.get(id=id)
-        form = ReviewCreateForm(data=request.POST)
+        data = request.POST
+        form = ReviewCreateForm(data=data)
 
         if form.is_valid():
             Review.objects.create(
                 text=form.cleaned_data.get('text'),
-                post_id=id
+                product_id=self.get_object().id
             )
-        context = {
-            'post': post,
-            'reviews': post.review_set.all(),
-            'form': form
+            return redirect(f'/products/{self.get_object().id}/')
+
+        return render(request, self.template_name, context=self.get_context_data(
+            form=form
+        ))
+class CreateProductCBV(ListView, CreateView):
+    model = Post
+    template_name = 'products/create.html'
+    form_class = PostCreateForm
+
+    def get_context_data(self, *, object_list=None, **kwargs):
+        return {
+            'form': self.form_class if not kwargs.get('form') else kwargs['form']
         }
 
-        return render(request, 'products/detail.html', context=context)
-def post_create_view(request):
-    if request.method == 'GET':
-        context = {
-            'form': PostCreateForm
-        }
-        return render(request, 'products/create.html', context=context)
+    def get(self, request, **kwargs):
+        return render(request, self.template_name, context=self.get_context_data())
 
-    if request.method == 'POST':
-        form = PostCreateForm(request.POST, request.FILES)
+    def post(self, request, **kwargs):
+        data, files = request.POST, request.FILES
+
+        form = PostCreateForm(data, files)
 
         if form.is_valid():
             Post.objects.create(
+                image=form.cleaned_data.get('image'),
                 title=form.cleaned_data.get('title'),
                 description=form.cleaned_data.get('description'),
-                rate=form.cleaned_data.get('rate'),
-                image=form.cleaned_data.get('image')
+                price=form.cleaned_data.get('price')
             )
             return redirect('/products/')
 
-        return render(request, 'products/create.html', context={
-            'form': form
-        })
+        return render(request, self.template_name, context=self.get_context_data(
+            form=form
+        ))
